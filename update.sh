@@ -2,7 +2,7 @@
 # PraestoClaw STAGING one-click updater for macOS / Linux.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/update.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/update.sh | bash
 #
 # Differences from the prod updater:
 # - Pulls wheels and latest.txt from the ``staging`` branch.
@@ -10,7 +10,7 @@
 
 set -uo pipefail
 
-MIRROR_BASE="https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging"
+MIRROR_BASE="https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main"
 PACKAGE="${PRAESTOCLAW_PACKAGE:-}"
 
 step()  { printf '\n\033[36m>> %s\033[0m\n' "$*"; }
@@ -109,7 +109,7 @@ step "Checking current staging installation ..."
 if ! has_cmd praestoclaw-staging; then
     fail "PraestoClaw (staging) is not installed.
   Run the staging installer first:
-    curl -fsSL https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/install.sh | bash"
+    curl -fsSL https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/install.sh | bash"
 fi
 
 current_version_raw=$(praestoclaw-staging version 2>&1)

@@ -3,13 +3,13 @@
     PraestoClaw STAGING one-click installer for Windows.
 
 .DESCRIPTION
-    Installs the staging build of PraestoClaw from the cogao/praestoclaw-installer
+    Installs the staging build of PraestoClaw from the xchunzhao/praestoclaw-installer-staging
     ``staging`` branch. Exposes the ``praestoclaw-staging`` / ``pc-staging``
     entry points, which write to ``~/.praestoclaw-staging/`` and point at
     the staging gateway. Coexists with a prod install on the same machine.
 
     Run from PowerShell:
-        irm https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/install.ps1 | iex
+        irm https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/install.ps1 | iex
 #>
 
 $ErrorActionPreference = "Continue"
@@ -27,7 +27,7 @@ $MinMinor  = 11
 $PyVersion = "3.13"
 $PyArch    = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "amd64" }
 $PyUrl     = "https://www.python.org/ftp/python/$PyVersion.0/python-$PyVersion.0-$PyArch.exe"
-$MirrorBase = "https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging"
+$MirrorBase = "https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main"
 $Package    = $env:PRAESTOCLAW_PACKAGE
 
 function Write-Step { param([string]$m) Write-Host "" ; Write-Host ">> $m" -ForegroundColor Cyan }

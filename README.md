@@ -8,12 +8,12 @@ upcoming changes against the staging gateway without touching the prod path.
 
 ```powershell
 # Windows
-irm https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/install.ps1 | iex
+irm https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/install.ps1 | iex
 ```
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/install.sh | bash
 ```
 
 After install, the staging client is exposed as **`praestoclaw-staging`** /
@@ -29,12 +29,12 @@ install on the same machine:
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/update.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/update.sh | bash
 ```
 
 ```powershell
 # Windows
-irm https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/update.ps1 | iex
+irm https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/update.ps1 | iex
 ```
 
 ## Artifacts

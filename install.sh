@@ -2,10 +2,10 @@
 # PraestoClaw STAGING one-click installer for macOS / Linux.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/install.sh | bash
 #
 # Differences from the prod (main) installer:
-# - Pulls wheels from the ``staging`` branch of cogao/praestoclaw-installer.
+# - Pulls wheels from xchunzhao/praestoclaw-installer-staging (main branch).
 # - Invokes the ``praestoclaw-staging`` / ``pc-staging`` entry points so the
 #   client writes to ``~/.praestoclaw-staging/`` and points at the staging
 #   gateway (``praestoclawgatewaystaging-…``).
@@ -17,7 +17,7 @@ set -uo pipefail   # -e intentionally omitted: handle errors explicitly
 MIN_MAJOR=3
 MIN_MINOR=11
 PYTHON_INSTALL_VERSION="3.13"
-MIRROR_BASE="https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging"
+MIRROR_BASE="https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main"
 PACKAGE="${PRAESTOCLAW_PACKAGE:-}"
 OS="$(uname -s)"
 

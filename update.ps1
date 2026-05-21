@@ -3,12 +3,12 @@
     PraestoClaw STAGING one-click updater for Windows.
 
 .DESCRIPTION
-    Updates the staging build of PraestoClaw from the cogao/praestoclaw-installer
+    Updates the staging build of PraestoClaw from the xchunzhao/praestoclaw-installer-staging
     ``staging`` branch. Targets the ``praestoclaw-staging`` / ``pc-staging``
     entry points; leaves any prod ``praestoclaw`` install alone.
 
     Run from PowerShell:
-        irm https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/update.ps1 | iex
+        irm https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/update.ps1 | iex
 #>
 
 $ErrorActionPreference = "Continue"
@@ -21,7 +21,7 @@ try {
     $env:PYTHONUTF8           = "1"
 } catch {}
 
-$MirrorBase = "https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging"
+$MirrorBase = "https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main"
 $Package    = $env:PRAESTOCLAW_PACKAGE
 
 function Write-Step { param([string]$m) Write-Host "" ; Write-Host ">> $m" -ForegroundColor Cyan }
@@ -152,7 +152,7 @@ if (-not (Get-Command praestoclaw-staging -ErrorAction SilentlyContinue)) {
     Write-Fail "PraestoClaw (staging) is not installed."
     Write-Host ""
     Write-Host "  Run the staging installer first:" -ForegroundColor Yellow
-    Write-Host "    irm https://raw.githubusercontent.com/cogao/praestoclaw-installer/staging/install.ps1 | iex" -ForegroundColor Yellow
+    Write-Host "    irm https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/main/install.ps1 | iex" -ForegroundColor Yellow
     Write-Host ""
     exit 1
 }
