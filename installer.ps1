@@ -10,6 +10,16 @@ $ErrorActionPreference = 'Stop'
 # ========== 仓库位置（同一分支放 installer 和 tgz） ==========
 $RawBase = 'https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/qa-record'
 $TgzName = 'qa-record.tgz'
+
+# ========== 可选环境（tester 装的时候会选一个） ==========
+$Environments = @(
+    @{ Name = 'staging';     Url = 'https://staging.societas.microsoft.com'; LoginPath = '/login' },
+    @{ Name = 'production';  Url = 'https://societas.microsoft.com';         LoginPath = '/login' },
+    @{ Name = 'dev';         Url = 'https://dev.societas.microsoft.com';     LoginPath = '/login' }
+)
+# 支持从环境变量指定，绕过交互（irm | iex 时用）：
+#   $env:QA_ENV='production'; irm ... | iex
+$PresetEnv = $env:QA_ENV
 # ==========================================================
 
 function Info($msg)  { Write-Host "  $msg" -ForegroundColor Gray }
@@ -102,12 +112,61 @@ if ($userPath -notlike "*$binDir*") {
     Ok "已在 PATH"
 }
 
+# ---------- 5. 选择环境并写入全局 config ----------
+Step 5 "选择要测试的环境"
+Write-Host ""
+for ($i = 0; $i -lt $Environments.Count; $i++) {
+    $e = $Environments[$i]
+    Write-Host ("  {0}) {1,-12} {2}" -f ($i + 1), $e.Name, $e.Url) -ForegroundColor White
+}
+Write-Host ""
+
+$selected = $null
+if ($PresetEnv) {
+    $selected = $Environments | Where-Object { $_.Name -ieq $PresetEnv } | Select-Object -First 1
+    if ($selected) {
+        Info "从 `$env:QA_ENV 选中: $($selected.Name)"
+    } else {
+        Warn "环境变量 QA_ENV=$PresetEnv 无效，可选: $($Environments.Name -join ', ')"
+    }
+}
+
+if (-not $selected) {
+    $canPrompt = $false
+    try { $canPrompt = -not [Console]::IsInputRedirected } catch {}
+
+    if ($canPrompt) {
+        $choice = Read-Host "请输入序号 [1]"
+        if ([string]::IsNullOrWhiteSpace($choice)) { $choice = '1' }
+        $idx = 0
+        [void][int]::TryParse($choice, [ref]$idx)
+        if ($idx -lt 1 -or $idx -gt $Environments.Count) { Warn "输入无效，默认使用 1"; $idx = 1 }
+        $selected = $Environments[$idx - 1]
+    } else {
+        Info "（管道模式无法交互，默认使用 1 - $($Environments[0].Name)）"
+        Info "想选其他环境，先设环境变量后再跑：`$env:QA_ENV='production'; irm ... | iex"
+        $selected = $Environments[0]
+    }
+}
+
+$globalDir = Join-Path $env:USERPROFILE ".qa-record"
+$configPath = Join-Path $globalDir "qa.config.js"
+$configContent = @"
+// qa-record 全局配置。install 时选的环境，可随时改。
+module.exports = {
+  baseURL: '$($selected.Url)',
+  loginCheck: { urlIncludes: '$($selected.LoginPath)' },
+};
+"@
+Set-Content -Path $configPath -Value $configContent -Encoding UTF8
+Ok "已配置环境: $($selected.Name) ($($selected.Url))"
+Info "如需切换：改 $configPath"
+
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host "  ✅ 安装完成" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "使用（新开一个 PowerShell 窗口）：" -ForegroundColor Cyan
-Write-Host "  cd <被测项目目录>" -ForegroundColor White
-Write-Host "  qa-record <case-name>" -ForegroundColor White
+Write-Host "  qa-record <test-case-id>" -ForegroundColor White
 Write-Host ""
