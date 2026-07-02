@@ -70,25 +70,21 @@ try {
 }
 Ok "已下载 $TgzName"
 
-# ---------- 3. 解压 + 装依赖 ----------
-Step 3 "安装（含 Chromium，几分钟）"
+# ---------- 3. 解压（自带依赖，无需 npm install） ----------
+Step 3 "解压安装"
 $installDir = Join-Path $env:USERPROFILE ".qa-record"
 if (Test-Path $installDir) { Remove-Item -Recurse -Force $installDir }
 New-Item -ItemType Directory -Path $installDir | Out-Null
 
-tar -xzf $tmpTgz -C $installDir --strip-components=1
+tar -xzf $tmpTgz -C $installDir
 if ($LASTEXITCODE -ne 0) { Fail "解压失败"; exit 1 }
 Remove-Item $tmpTgz -Force
 
-Push-Location $installDir
-try {
-    npm install --omit=dev
-    if ($LASTEXITCODE -ne 0) { throw "npm install 失败（见上方错误信息）" }
-    if (-not (Test-Path (Join-Path $installDir "node_modules\playwright-core"))) {
-        throw "npm install 结束但 playwright-core 没装上"
-    }
-} finally { Pop-Location }
-Ok "依赖装好"
+if (-not (Test-Path (Join-Path $installDir "node_modules\playwright-core"))) {
+    Fail "解压后 playwright-core 缺失"
+    exit 1
+}
+Ok "已安装（含依赖，无需 npm install）"
 
 # ---------- 4. 注册命令 ----------
 Step 4 "注册 qa-record 命令"

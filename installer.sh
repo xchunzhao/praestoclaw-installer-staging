@@ -79,20 +79,19 @@ if ! curl -fsSL -o "$tmp_tgz" "$tgz_url"; then
 fi
 ok "已下载 $TGZ_NAME"
 
-# ---------- 3. 解压 + 装依赖 ----------
-step 3 "安装（含 Chromium，几分钟）"
+# ---------- 3. 解压（自带依赖，无需 npm install） ----------
+step 3 "解压安装"
 INSTALL_DIR="$HOME/.qa-record"
 rm -rf "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
-tar -xzf "$tmp_tgz" -C "$INSTALL_DIR" --strip-components=1
+tar -xzf "$tmp_tgz" -C "$INSTALL_DIR"
 rm -f "$tmp_tgz"
 
-(cd "$INSTALL_DIR" && npm install --omit=dev)
 if [ ! -d "$INSTALL_DIR/node_modules/playwright-core" ]; then
-    fail "npm install 结束但 playwright-core 没装上"
+    fail "解压后 playwright-core 缺失"
     exit 1
 fi
-ok "依赖装好"
+ok "已安装（含依赖，无需 npm install）"
 
 # ---------- 4. 注册命令 ----------
 step 4 "注册 qa-record 命令"
