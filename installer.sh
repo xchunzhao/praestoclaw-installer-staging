@@ -87,7 +87,11 @@ mkdir -p "$INSTALL_DIR"
 tar -xzf "$tmp_tgz" -C "$INSTALL_DIR" --strip-components=1
 rm -f "$tmp_tgz"
 
-(cd "$INSTALL_DIR" && npm install --loglevel=error --omit=dev)
+(cd "$INSTALL_DIR" && npm install --omit=dev)
+if [ ! -d "$INSTALL_DIR/node_modules/playwright-core" ]; then
+    fail "npm install 结束但 playwright-core 没装上"
+    exit 1
+fi
 ok "依赖装好"
 
 # ---------- 4. 注册命令 ----------

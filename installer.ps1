@@ -82,8 +82,11 @@ Remove-Item $tmpTgz -Force
 
 Push-Location $installDir
 try {
-    npm install --loglevel=error --omit=dev
-    if ($LASTEXITCODE -ne 0) { throw "npm install 失败" }
+    npm install --omit=dev
+    if ($LASTEXITCODE -ne 0) { throw "npm install 失败（见上方错误信息）" }
+    if (-not (Test-Path (Join-Path $installDir "node_modules\playwright-core"))) {
+        throw "npm install 结束但 playwright-core 没装上"
+    }
 } finally { Pop-Location }
 Ok "依赖装好"
 
