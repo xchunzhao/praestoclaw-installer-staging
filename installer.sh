@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # qa-record 全自动一键安装（macOS / Linux）
 # 用法：
-#   curl -fsSL https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/qa-record/installer.sh | bash
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/qa-record/installer.sh)"
 
 set -e
 
@@ -9,7 +9,7 @@ set -e
 RAW_BASE="https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/qa-record"
 TGZ_NAME="qa-record.tgz"
 
-# ========== 可选环境（tester 装的时候会选一个） ==========
+# ========== 可选环境 ==========
 ENV_NAMES=("staging" "production" "dev")
 ENV_URLS=(
     "https://staging.societas.microsoft.com"
@@ -17,9 +17,7 @@ ENV_URLS=(
     "https://dev.societas.microsoft.com"
 )
 ENV_LOGIN_PATH="/login"
-# 支持从环境变量指定（curl | bash 时用）：QA_ENV=production curl ... | bash
-PRESET_ENV="${QA_ENV:-}"
-# ==========================================================
+# ==============================
 
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; GRAY='\033[0;90m'; NC='\033[0m'
 info()  { echo -e "  ${GRAY}$1${NC}"; }
@@ -138,35 +136,17 @@ for i in "${!ENV_NAMES[@]}"; do
 done
 echo
 
-selected_idx=-1
-if [ -n "$PRESET_ENV" ]; then
-    for i in "${!ENV_NAMES[@]}"; do
-        if [ "${ENV_NAMES[$i]}" = "$PRESET_ENV" ]; then
-            selected_idx=$i
-            info "从 \$QA_ENV 选中: ${ENV_NAMES[$i]}"
-            break
-        fi
-    done
-    if [ "$selected_idx" -eq -1 ]; then
-        warn "环境变量 QA_ENV=$PRESET_ENV 无效"
-    fi
-fi
-
-if [ "$selected_idx" -eq -1 ]; then
-    if [ -t 0 ]; then
-        read -p "请输入序号 [1]: " choice </dev/tty || choice=""
-        [ -z "$choice" ] && choice=1
-        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#ENV_NAMES[@]}" ]; then
-            selected_idx=$((choice - 1))
-        else
-            warn "输入无效，默认使用 1"
-            selected_idx=0
-        fi
+selected_idx=0
+if [ -e /dev/tty ]; then
+    read -p "请输入序号 [1]: " choice </dev/tty || choice=""
+    [ -z "$choice" ] && choice=1
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#ENV_NAMES[@]}" ]; then
+        selected_idx=$((choice - 1))
     else
-        info "（管道模式无法交互，默认使用 1 - ${ENV_NAMES[0]}）"
-        info "想选其他环境，先设环境变量后再跑：QA_ENV=production curl ... | bash"
-        selected_idx=0
+        warn "输入无效，默认使用 1"
     fi
+else
+    info "无法读取输入，默认使用 1 - ${ENV_NAMES[0]}"
 fi
 
 sel_name="${ENV_NAMES[$selected_idx]}"

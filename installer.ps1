@@ -1,6 +1,8 @@
 # qa-record 全自动一键安装（Windows）
 # 用法（PowerShell）：
-#   irm https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/qa-record/installer.ps1 | iex
+#   iex (irm https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/qa-record/installer.ps1)
+#
+# ⚠️ 注意用 iex (irm ...) 而不是 irm ... | iex，否则无法交互选环境。
 #
 # 如果提示脚本被禁用，先跑一次：
 #   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -11,16 +13,13 @@ $ErrorActionPreference = 'Stop'
 $RawBase = 'https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-staging/qa-record'
 $TgzName = 'qa-record.tgz'
 
-# ========== 可选环境（tester 装的时候会选一个） ==========
+# ========== 可选环境 ==========
 $Environments = @(
     @{ Name = 'staging';     Url = 'https://staging.societas.microsoft.com'; LoginPath = '/login' },
     @{ Name = 'production';  Url = 'https://societas.microsoft.com';         LoginPath = '/login' },
     @{ Name = 'dev';         Url = 'https://dev.societas.microsoft.com';     LoginPath = '/login' }
 )
-# 支持从环境变量指定，绕过交互（irm | iex 时用）：
-#   $env:QA_ENV='production'; irm ... | iex
-$PresetEnv = $env:QA_ENV
-# ==========================================================
+# ==============================
 
 function Info($msg)  { Write-Host "  $msg" -ForegroundColor Gray }
 function Ok($msg)    { Write-Host "  ✓ $msg" -ForegroundColor Green }
@@ -121,33 +120,15 @@ for ($i = 0; $i -lt $Environments.Count; $i++) {
 }
 Write-Host ""
 
-$selected = $null
-if ($PresetEnv) {
-    $selected = $Environments | Where-Object { $_.Name -ieq $PresetEnv } | Select-Object -First 1
-    if ($selected) {
-        Info "从 `$env:QA_ENV 选中: $($selected.Name)"
-    } else {
-        Warn "环境变量 QA_ENV=$PresetEnv 无效，可选: $($Environments.Name -join ', ')"
-    }
+$choice = Read-Host "请输入序号 [1]"
+if ([string]::IsNullOrWhiteSpace($choice)) { $choice = '1' }
+$idx = 0
+[void][int]::TryParse($choice, [ref]$idx)
+if ($idx -lt 1 -or $idx -gt $Environments.Count) {
+    Warn "输入无效，默认使用 1"
+    $idx = 1
 }
-
-if (-not $selected) {
-    $canPrompt = $false
-    try { $canPrompt = -not [Console]::IsInputRedirected } catch {}
-
-    if ($canPrompt) {
-        $choice = Read-Host "请输入序号 [1]"
-        if ([string]::IsNullOrWhiteSpace($choice)) { $choice = '1' }
-        $idx = 0
-        [void][int]::TryParse($choice, [ref]$idx)
-        if ($idx -lt 1 -or $idx -gt $Environments.Count) { Warn "输入无效，默认使用 1"; $idx = 1 }
-        $selected = $Environments[$idx - 1]
-    } else {
-        Info "（管道模式无法交互，默认使用 1 - $($Environments[0].Name)）"
-        Info "想选其他环境，先设环境变量后再跑：`$env:QA_ENV='production'; irm ... | iex"
-        $selected = $Environments[0]
-    }
-}
+$selected = $Environments[$idx - 1]
 
 $globalDir = Join-Path $env:USERPROFILE ".qa-record"
 $configPath = Join-Path $globalDir "qa.config.js"
