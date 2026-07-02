@@ -15,9 +15,11 @@ $TgzName = 'qa-record.tgz'
 
 # ========== 可选环境 ==========
 $Environments = @(
-    @{ Name = 'staging';     Url = 'https://staging.societas.microsoft.com'; LoginPath = '/login' },
-    @{ Name = 'production';  Url = 'https://societas.microsoft.com';         LoginPath = '/login' },
-    @{ Name = 'dev';         Url = 'https://dev.societas.microsoft.com';     LoginPath = '/login' }
+    @{ Name = 'staging';     Url = 'https://staging.societas.microsoft.com';       LoginPath = '/login' },
+    @{ Name = 'dogfood';     Url = 'https://dogfood.societas-test.microsoft.com';  LoginPath = '/login' },
+    @{ Name = 'test';        Url = 'https://societas-test.microsoft.com';          LoginPath = '/login' },
+    @{ Name = 'production';  Url = 'https://societas.microsoft.com';               LoginPath = '/login' },
+    @{ Name = 'dev';         Url = 'https://dev.societas.microsoft.com';           LoginPath = '/login' }
 )
 # ==============================
 
@@ -100,7 +102,7 @@ Step 4 "注册 qa-record 命令"
 $binDir = Join-Path $env:USERPROFILE ".qa-record-bin"
 if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Path $binDir | Out-Null }
 $cmdPath = Join-Path $binDir "qa-record.cmd"
-"@echo off`r`nnode `"$installDir\bin\qa-record.js`" %*" | Set-Content -Path $cmdPath -Encoding ASCII
+"@echo off`r`nnode `"$installDir\dist\qa-record.js`" %*" | Set-Content -Path $cmdPath -Encoding ASCII
 
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($userPath -notlike "*$binDir*") {
