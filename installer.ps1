@@ -112,6 +112,3 @@ Write-Host "使用（新开一个 PowerShell 窗口）：" -ForegroundColor Cyan
 Write-Host "  cd <被测项目目录>" -ForegroundColor White
 Write-Host "  qa-record <case-name>" -ForegroundColor White
 Write-Host ""
-Write-Host "首次使用需要项目里有 qa.config.js（工程师提供）。" -ForegroundColor Yellow
-Write-Host "如果没有，运行 qa-record 会给出模板。" -ForegroundColor Yellow
-Write-Host ""

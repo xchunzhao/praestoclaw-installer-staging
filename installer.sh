@@ -125,6 +125,3 @@ echo -e "${CYAN}使用（新开一个终端窗口）：${NC}"
 echo "  cd <被测项目目录>"
 echo "  qa-record <case-name>"
 echo
-echo -e "${YELLOW}首次使用需要项目里有 qa.config.js（工程师提供）。${NC}"
-echo -e "${YELLOW}如果没有，运行 qa-record 会给出模板。${NC}"
-echo
