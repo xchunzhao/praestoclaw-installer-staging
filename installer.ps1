@@ -15,11 +15,9 @@ $TgzName = 'qa-record.tgz'
 
 # ========== 可选环境 ==========
 $Environments = @(
-    @{ Name = 'staging';     Url = 'https://staging.societas.microsoft.com';       LoginPath = '/login' },
-    @{ Name = 'dogfood';     Url = 'https://dogfood.societas-test.microsoft.com';  LoginPath = '/login' },
-    @{ Name = 'test';        Url = 'https://societas-test.microsoft.com';          LoginPath = '/login' },
-    @{ Name = 'production';  Url = 'https://societas.microsoft.com';               LoginPath = '/login' },
-    @{ Name = 'dev';         Url = 'https://dev.societas.microsoft.com';           LoginPath = '/login' }
+    @{ Name = 'staging';     Url = 'https://staging.societas.microsoft.com'; LoginPath = '/login' },
+    @{ Name = 'production';  Url = 'https://societas.microsoft.com';         LoginPath = '/login' },
+    @{ Name = 'dev';         Url = 'https://dev.societas.microsoft.com';     LoginPath = '/login' }
 )
 # ==============================
 
@@ -84,8 +82,12 @@ Ok "已下载 $TgzName"
 # ---------- 3. 解压（自带依赖，无需 npm install） ----------
 Step 3 "解压安装"
 $installDir = Join-Path $env:USERPROFILE ".qa-record"
-if (Test-Path $installDir) { Remove-Item -Recurse -Force $installDir }
-New-Item -ItemType Directory -Path $installDir | Out-Null
+if (-not (Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
+# 只清程序代码，保留 tests/ / auth.json / qa.config.js 等用户数据
+foreach ($sub in @('dist','bin','node_modules','package.json')) {
+    $p = Join-Path $installDir $sub
+    if (Test-Path $p) { Remove-Item -Recurse -Force $p }
+}
 
 tar -xzf $tmpTgz -C $installDir
 if ($LASTEXITCODE -ne 0) { Fail "解压失败"; exit 1 }
@@ -102,7 +104,7 @@ Step 4 "注册 qa-record 命令"
 $binDir = Join-Path $env:USERPROFILE ".qa-record-bin"
 if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Path $binDir | Out-Null }
 $cmdPath = Join-Path $binDir "qa-record.cmd"
-"@echo off`r`nnode `"$installDir\dist\qa-record.js`" %*" | Set-Content -Path $cmdPath -Encoding ASCII
+"@echo off`r`nnode `"$installDir\bin\qa-record.js`" %*" | Set-Content -Path $cmdPath -Encoding ASCII
 
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($userPath -notlike "*$binDir*") {
@@ -114,36 +116,43 @@ if ($userPath -notlike "*$binDir*") {
 }
 
 # ---------- 5. 选择环境并写入全局 config ----------
-Step 5 "选择要测试的环境"
-Write-Host ""
-for ($i = 0; $i -lt $Environments.Count; $i++) {
-    $e = $Environments[$i]
-    Write-Host ("  {0}) {1,-12} {2}" -f ($i + 1), $e.Name, $e.Url) -ForegroundColor White
-}
-Write-Host ""
-
-$choice = Read-Host "请输入序号 [1]"
-if ([string]::IsNullOrWhiteSpace($choice)) { $choice = '1' }
-$idx = 0
-[void][int]::TryParse($choice, [ref]$idx)
-if ($idx -lt 1 -or $idx -gt $Environments.Count) {
-    Warn "输入无效，默认使用 1"
-    $idx = 1
-}
-$selected = $Environments[$idx - 1]
-
 $globalDir = Join-Path $env:USERPROFILE ".qa-record"
 $configPath = Join-Path $globalDir "qa.config.js"
-$configContent = @"
+
+if (Test-Path $configPath) {
+    Step 5 "已有配置，跳过环境选择"
+    Ok "沿用现有配置: $configPath"
+    Info "如需切换环境：改这个文件里的 baseURL"
+} else {
+    Step 5 "选择要测试的环境"
+    Write-Host ""
+    for ($i = 0; $i -lt $Environments.Count; $i++) {
+        $e = $Environments[$i]
+        Write-Host ("  {0}) {1,-12} {2}" -f ($i + 1), $e.Name, $e.Url) -ForegroundColor White
+    }
+    Write-Host ""
+
+    $choice = Read-Host "请输入序号 [1]"
+    if ([string]::IsNullOrWhiteSpace($choice)) { $choice = '1' }
+    $idx = 0
+    [void][int]::TryParse($choice, [ref]$idx)
+    if ($idx -lt 1 -or $idx -gt $Environments.Count) {
+        Warn "输入无效，默认使用 1"
+        $idx = 1
+    }
+    $selected = $Environments[$idx - 1]
+
+    $configContent = @"
 // qa-record 全局配置。install 时选的环境，可随时改。
 module.exports = {
   baseURL: '$($selected.Url)',
   loginCheck: { urlIncludes: '$($selected.LoginPath)' },
 };
 "@
-Set-Content -Path $configPath -Value $configContent -Encoding UTF8
-Ok "已配置环境: $($selected.Name) ($($selected.Url))"
-Info "如需切换：改 $configPath"
+    Set-Content -Path $configPath -Value $configContent -Encoding UTF8
+    Ok "已配置环境: $($selected.Name) ($($selected.Url))"
+    Info "如需切换：改 $configPath"
+}
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green
