@@ -10,9 +10,11 @@ RAW_BASE="https://raw.githubusercontent.com/xchunzhao/praestoclaw-installer-stag
 TGZ_NAME="qa-record.tgz"
 
 # ========== 可选环境 ==========
-ENV_NAMES=("staging" "production" "dev")
+ENV_NAMES=("staging" "dogfood" "test" "production" "dev")
 ENV_URLS=(
     "https://staging.societas.microsoft.com"
+    "https://dogfood.societas-test.microsoft.com"
+    "https://societas-test.microsoft.com"
     "https://societas.microsoft.com"
     "https://dev.societas.microsoft.com"
 )

@@ -15,9 +15,11 @@ $TgzName = 'qa-record.tgz'
 
 # ========== 可选环境 ==========
 $Environments = @(
-    @{ Name = 'staging';     Url = 'https://staging.societas.microsoft.com'; LoginPath = '/login' },
-    @{ Name = 'production';  Url = 'https://societas.microsoft.com';         LoginPath = '/login' },
-    @{ Name = 'dev';         Url = 'https://dev.societas.microsoft.com';     LoginPath = '/login' }
+    @{ Name = 'staging';     Url = 'https://staging.societas.microsoft.com';       LoginPath = '/login' },
+    @{ Name = 'dogfood';     Url = 'https://dogfood.societas-test.microsoft.com';  LoginPath = '/login' },
+    @{ Name = 'test';        Url = 'https://societas-test.microsoft.com';          LoginPath = '/login' },
+    @{ Name = 'production';  Url = 'https://societas.microsoft.com';               LoginPath = '/login' },
+    @{ Name = 'dev';         Url = 'https://dev.societas.microsoft.com';           LoginPath = '/login' }
 )
 # ==============================
 
