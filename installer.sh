@@ -92,8 +92,8 @@ ok "已下载 $TGZ_NAME"
 step 3 "解压安装"
 INSTALL_DIR="$HOME/.qa-record"
 mkdir -p "$INSTALL_DIR"
-# 只清程序代码，保留 tests/ / auth.json / qa.config.js 等用户数据
-rm -rf "$INSTALL_DIR/dist" "$INSTALL_DIR/bin" "$INSTALL_DIR/node_modules" "$INSTALL_DIR/package.json"
+# 只清程序代码，保留 tests/ / auth.json / qa.config.js / bin/（启动脚本）
+rm -rf "$INSTALL_DIR/dist" "$INSTALL_DIR/node_modules" "$INSTALL_DIR/package.json"
 tar -xzf "$tmp_tgz" -C "$INSTALL_DIR"
 rm -f "$tmp_tgz"
 
@@ -105,7 +105,7 @@ ok "已安装（含依赖，无需 npm install）"
 
 # ---------- 4. 注册命令 ----------
 step 4 "注册 qa-record 命令"
-BIN_DIR="$HOME/.qa-record-bin"
+BIN_DIR="$INSTALL_DIR/bin"
 mkdir -p "$BIN_DIR"
 cat > "$BIN_DIR/qa-record" <<EOF
 #!/usr/bin/env bash
@@ -113,19 +113,27 @@ exec node "$INSTALL_DIR/dist/qa-record.js" "\$@"
 EOF
 chmod +x "$BIN_DIR/qa-record"
 
-# 加进 PATH（幂等）
+# 加进 PATH（幂等）；把老的 ~/.qa-record-bin 也清理掉
 add_to_rc() {
     local rc="$1"
-    if [ -f "$rc" ] && ! grep -q ".qa-record-bin" "$rc"; then
-        echo '' >> "$rc"
-        echo '# qa-record' >> "$rc"
-        echo "export PATH=\"\$HOME/.qa-record-bin:\$PATH\"" >> "$rc"
-        info "已写入 $rc"
+    if [ -f "$rc" ]; then
+        # 移除老配置
+        if grep -q ".qa-record-bin" "$rc"; then
+            # 兼容 mac/linux sed
+            sed -i.bak '/qa-record-bin/d' "$rc" && rm -f "$rc.bak"
+        fi
+        if ! grep -q "\.qa-record/bin" "$rc"; then
+            echo '' >> "$rc"
+            echo '# qa-record' >> "$rc"
+            echo "export PATH=\"\$HOME/.qa-record/bin:\$PATH\"" >> "$rc"
+            info "已写入 $rc"
+        fi
     fi
 }
 add_to_rc "$HOME/.zshrc"
 add_to_rc "$HOME/.bashrc"
 add_to_rc "$HOME/.bash_profile"
+rm -rf "$HOME/.qa-record-bin"
 export PATH="$BIN_DIR:$PATH"
 ok "已加入 PATH"
 

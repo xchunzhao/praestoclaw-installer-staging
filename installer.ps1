@@ -83,8 +83,8 @@ Ok "已下载 $TgzName"
 Step 3 "解压安装"
 $installDir = Join-Path $env:USERPROFILE ".qa-record"
 if (-not (Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
-# 只清程序代码，保留 tests/ / auth.json / qa.config.js 等用户数据
-foreach ($sub in @('dist','bin','node_modules','package.json')) {
+# 只清程序代码，保留 tests/ / auth.json / qa.config.js / bin/（启动脚本）
+foreach ($sub in @('dist','node_modules','package.json')) {
     $p = Join-Path $installDir $sub
     if (Test-Path $p) { Remove-Item -Recurse -Force $p }
 }
@@ -101,15 +101,22 @@ Ok "已安装（含依赖，无需 npm install）"
 
 # ---------- 4. 注册命令 ----------
 Step 4 "注册 qa-record 命令"
-$binDir = Join-Path $env:USERPROFILE ".qa-record-bin"
+$binDir = Join-Path $installDir "bin"
 if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Path $binDir | Out-Null }
 $cmdPath = Join-Path $binDir "qa-record.cmd"
 "@echo off`r`nnode `"$installDir\dist\qa-record.js`" %*" | Set-Content -Path $cmdPath -Encoding ASCII
 
+# 清理老的 ~/.qa-record-bin（v0.2.0 及之前用的目录）
+$oldBinDir = Join-Path $env:USERPROFILE ".qa-record-bin"
+if (Test-Path $oldBinDir) { Remove-Item -Recurse -Force $oldBinDir }
+
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
-if ($userPath -notlike "*$binDir*") {
-    [Environment]::SetEnvironmentVariable("Path", "$userPath;$binDir", "User")
-    $env:Path += ";$binDir"
+# 剔掉老路径
+$cleanedPath = ($userPath -split ';' | Where-Object { $_ -and $_ -notlike "*\.qa-record-bin*" }) -join ';'
+if ($cleanedPath -notlike "*$binDir*") {
+    $newPath = if ($cleanedPath) { "$cleanedPath;$binDir" } else { $binDir }
+    [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+    $env:Path = "$env:Path;$binDir"
     Ok "已加入 PATH"
 } else {
     Ok "已在 PATH"
