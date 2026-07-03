@@ -104,7 +104,7 @@ Step 4 "注册 qa-record 命令"
 $binDir = Join-Path $env:USERPROFILE ".qa-record-bin"
 if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Path $binDir | Out-Null }
 $cmdPath = Join-Path $binDir "qa-record.cmd"
-"@echo off`r`nnode `"$installDir\bin\qa-record.js`" %*" | Set-Content -Path $cmdPath -Encoding ASCII
+"@echo off`r`nnode `"$installDir\dist\qa-record.js`" %*" | Set-Content -Path $cmdPath -Encoding ASCII
 
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($userPath -notlike "*$binDir*") {

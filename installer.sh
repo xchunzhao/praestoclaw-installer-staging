@@ -109,7 +109,7 @@ BIN_DIR="$HOME/.qa-record-bin"
 mkdir -p "$BIN_DIR"
 cat > "$BIN_DIR/qa-record" <<EOF
 #!/usr/bin/env bash
-exec node "$INSTALL_DIR/bin/qa-record.js" "\$@"
+exec node "$INSTALL_DIR/dist/qa-record.js" "\$@"
 EOF
 chmod +x "$BIN_DIR/qa-record"
 
